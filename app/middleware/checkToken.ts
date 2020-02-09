@@ -1,5 +1,12 @@
 import {verify} from 'jsonwebtoken';
 
+const path_ignore = [
+  '/api/account/register',
+  '/api/account/login',
+  '/api/materials/list',
+  '/api/materials/hot',
+]
+
 type DecodeInfo = {
   name?: string,
   exp: number,
@@ -11,7 +18,7 @@ export default options => {
     const token = ctx.request.header.authorization;
     const method = ctx.method.toLowerCase();
     // 当前请求时get请求，执行接下来的中间件
-    if (method === 'get' || ctx.path === '/api/account/register' || ctx.path === '/api/account/login') {
+    if (method === 'get' || path_ignore.includes(ctx.path)) {
       await next();
     // 当前token值不存在的时候
     } else {

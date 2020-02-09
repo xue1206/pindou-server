@@ -23,12 +23,15 @@
   },
   "dependencies": {
     "egg": "^2.6.1",
+    "egg-cors": "^2.2.3",
     "egg-mysql": "^3.0.0",
     "egg-scripts": "^2.6.0",
     "egg-validate": "^2.0.2",
+    "fs-extra": "^8.1.0",
     "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
+    "@types/fs-extra": "^8.0.1",
     "@types/jsonwebtoken": "^8.3.5",
     "@types/mocha": "^2.2.40",
     "@types/node": "^7.0.12",

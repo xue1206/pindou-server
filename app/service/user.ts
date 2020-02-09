@@ -9,8 +9,8 @@ type DecodeInfo = {
 }
 
 interface PageInfo<T = null> {
-  pn: number|string,
-  ps: number|string,
+  pn: number,
+  ps: number,
   ext: T
 }
 
@@ -20,15 +20,15 @@ class UserService extends Service {
     const where = this.ctx.helper.filterNotNull({ name, email });
     const res = await this.app.mapper.user.select({
       where, // WHERE 条件
-      columns: [ 'name', 'email' ], // 要查询的表字段
-      orders: [[ 'id', 'desc' ]], // 排序方式
+      columns: [ 'id', 'name', 'email' ], // 要查询的表字段
+      orders: [[ 'id', 'asc' ]], // 排序方式
       limit: pageSize, // 返回数据量
       offset: pageNo * pageSize,
     });
     return res;
   }
 
-  async create(params: User): Promise<User> {
+  async create(params: User) {
     const res = await this.app.mapper.user.insert(params);
     return res;
   }
@@ -44,7 +44,7 @@ class UserService extends Service {
           id: user.id,
         },
         this.config.checkToken.secret,
-        { expiresIn: 60 * 60 }
+        { expiresIn: 60 * 60 * 10 }
       );
       res = {
         status: '0',
@@ -69,15 +69,20 @@ class UserService extends Service {
     return res;
   }
 
-  async getList(pageInfo: PageInfo<{name: string, email: string}>) {
+  async getList(pageInfo: PageInfo<{name: string, email: string, searchContent: string}>) {
     const {pn, ps, ext} = pageInfo
-    const res = await this.select({
-      pageNo: pn,
-      pageSize: ps,
-      name: ext && ext.name,
-      email: ext && ext.email,
-    })
-    return res
+    const likeString = '%' + ext.searchContent + '%';
+    const sql = `SELECT id, name, email FROM pindou.user ${ext.searchContent ? "WHERE id LIKE ? or name LIKE ? or email LIKE ?" : ''} ORDER BY id ASC LIMIT ? OFFSET ?; `;
+    const params = ext.searchContent ? [likeString, likeString, likeString, ps, pn * ps] : [ps, pn * ps];
+    const sqlRes = await this.app.mapper.user.query(sql, params);
+
+    // const res = await this.select({
+    //   pageNo: pn,
+    //   pageSize: ps,
+    //   name: ext && ext.name,
+    //   email: ext && ext.email,
+    // })
+    return sqlRes
   }
 }
 
